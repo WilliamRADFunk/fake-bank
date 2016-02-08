@@ -8,6 +8,7 @@ package bank;
 
 public class Withdrawal implements Runnable
 {
+    // Value altered when interrupted. Keeps thread alive while true.
     private boolean alive = true;
 
     public void run()

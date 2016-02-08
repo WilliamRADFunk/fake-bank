@@ -8,6 +8,7 @@ package bank;
 
 public class Deposit implements Runnable
 {
+    // Value altered when interrupted. Keeps thread alive while true.
     private boolean alive = true;
 
     public void run()

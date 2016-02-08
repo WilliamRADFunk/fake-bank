@@ -40,6 +40,8 @@ public class Controller implements Initializable
         assert text_deposits != null : "fx:id=\"text_deposits\" was not injected: check your FXML file 'balanceSheet.fxml'.";
         assert text_withdrawals != null : "fx:id=\"text_withdrawals\" was not injected: check your FXML file 'balanceSheet.fxml'.";
     }
+    // Creates account. Disables GUI components that shouldn't be accessible during runtime. Creates account.
+    // Creates, and starts, the requisite deposit and withdrawal threads, adding them to their respective lists.
     @FXML
     private void start()
     {
@@ -71,6 +73,8 @@ public class Controller implements Initializable
         }
         catch(Exception e) {System.out.println("DEBUG: -----Start-----\n" + e + "DEBUG: ------End------\n");}
     }
+    // Deletes account. Enables relevant GUI elements, while disabling the stop button. All threads are interrupted, and
+    // removed from their respective lists.
     @FXML
     private void stop()
     {
