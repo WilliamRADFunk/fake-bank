@@ -6,13 +6,26 @@
 */
 package bank;
 
+
+import java.util.concurrent.locks.*;
+
 public class Account {
+    // Mutual Exclusion Lock. Keeps all threads synchronized without using the synchronized keyword.
+    final ReentrantLock lock = new ReentrantLock();
+    // Represents the lock's conditions.
+    final Condition lackOfFunds = lock.newCondition();
     // Bank account balance. This is the critical section value protected by Semaphore.
     private static int balance = 0;
+
     // Constructor
     public Account(int startingBalance)
     {
         balance = startingBalance;
+    }
+    // Gets the current balance of the account.
+    public int getBalance()
+    {
+        return this.balance;
     }
     // Adds money to the account after Semaphore is acquired.
     public void makeDeposit(int value)

@@ -57,14 +57,14 @@ public class Controller implements Initializable
             acct = new Account(0);
             for(int i = 0; i < this.numDepositThreads; i++)
             {
-                Deposit dep = new Deposit();
+                Deposit dep = new Deposit((i+1), acct);
                 Thread tdep = new Thread(dep);
                 deposits.add(tdep);
                 tdep.start();
             }
             for(int j = 0; j < this.numWithdrawalThreads; j++)
             {
-                Withdrawal wit = new Withdrawal();
+                Withdrawal wit = new Withdrawal((j+1), acct);
                 Thread twit = new Thread(wit);
                 withdrawals.add(twit);
                 twit.start();
