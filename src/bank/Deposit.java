@@ -12,40 +12,27 @@ public class Deposit implements Runnable
 {
     // Value altered when interrupted. Keeps thread alive while true.
     private boolean alive = true;
-    private int threadId = 0;
     private Random rand = new Random();
-    private Account account = null;
+    private Buffer account;
 
-    public Deposit(int id, Account acct)
-    {
-        this.threadId = id;
-        this.account = acct;
-    }
+    // Constructor
+    public Deposit(Buffer account) {this.account = account;}
+    // Manual interrupt of thread.
+    public void kill() {this.alive = false;}
     public void run()
     {
         while(this.alive)
         {
             try
             {
-                account.lackOfFunds.signalAll();
-                if(account.lock.tryLock())
-                {
-                    int amt = 0;
-                    do {amt = rand.nextInt(199) + 1;}while(amt % 2 != 0);
-                    account.makeDeposit(amt);
-                    System.out.println("I'm depThread# " + threadId + " of $" + amt + ", and the balance is: " + account.getBalance());
-                    account.lock.unlock();
-                    Thread.sleep(600);
-                } else
-                {
-                    System.out.println("Oops, busy. My bad...dep");
-                    Thread.sleep(300);
-                }
+                int amt;
+                do {amt = rand.nextInt(199) + 1;}while(amt % 2 != 0);
+                this.account.makeDeposit(amt);
+                Thread.sleep(800);
             }
             catch (InterruptedException e)
             {
                 System.out.println("DEBUG: -----Start-----\n" + e + "DEBUG: ------End------\n");
-                account.lock.unlock();
                 this.alive = false;
             }
         }

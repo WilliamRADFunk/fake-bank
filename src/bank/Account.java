@@ -7,40 +7,71 @@
 package bank;
 
 
+import javafx.scene.control.TextArea;
+
 import java.util.concurrent.locks.*;
 
-public class Account {
+public class Account implements bank.Buffer {
     // Mutual Exclusion Lock. Keeps all threads synchronized without using the synchronized keyword.
-    final ReentrantLock lock = new ReentrantLock();
+    private ReentrantLock lock = new ReentrantLock();
     // Represents the lock's conditions.
-    final Condition lackOfFunds = lock.newCondition();
+    private Condition canRead = lock.newCondition();
+    private Condition canWithdrawal = lock.newCondition();
     // Bank account balance. This is the critical section value protected by Semaphore.
-    private static int balance = 0;
+    private int balance = 0;
+    // Conditional determining if thread is currently accessing the account.
+    private boolean occupied = false;
+    private TextArea text;
 
     // Constructor
-    public Account(int startingBalance)
-    {
-        balance = startingBalance;
-    }
-    // Gets the current balance of the account.
-    public int getBalance()
-    {
-        return this.balance;
-    }
-    // Adds money to the account after Semaphore is acquired.
-    public void makeDeposit(int value)
-    {
-        balance += value;
-    }
-    // Checks to make sure there's enough money is in the account before withdrawing.
-    public boolean isWithdrawalValid(int value)
-    {
-        if(balance >= value) return true;
-        else return false;
-    }
+    public Account(TextArea text_transactions) {this.text = text_transactions;}
     // Account has enough money, now a withdrawal is made.
     public void makeWithdrawal(int value)
     {
-        balance -= value;
+        lock.lock();
+        try
+        {
+            while(occupied) {canWithdrawal.await();}
+            occupied = true;
+            if(value <= balance)
+            {
+                balance -= value;
+                String transaction;
+                if(value < 10) transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t\t\t\t\t\t$" + balance;
+                else transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t\t\t\t\t$" + balance;
+                //this.text.appendText(transaction);
+                System.out.println(transaction);
+            }
+            else
+            {
+                String transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t\t\t\t\tINSUFFICIENT FUNDS!";
+                //this.text.appendText(transaction);
+                System.out.println(transaction);
+            }
+            occupied = false;
+            canRead.signalAll();
+        }
+        catch ( InterruptedException exception ) {exception.printStackTrace();}
+        finally {lock.unlock();}
+    }
+    // Adds money to the account after Semaphore is acquired.
+    @Override
+    public void makeDeposit(int value)
+    {
+        lock.lock();
+        try
+        {
+            while(occupied) {canRead.await();}
+            occupied = true;
+            balance += value;
+            String transaction = "Deposit ($" + value + ")\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t$" + balance;
+            //this.text.appendText(transaction);
+            System.out.println(transaction);
+            occupied = false;
+            canWithdrawal.signalAll();
+            canRead.signalAll();
+        }
+        catch ( InterruptedException exception ) {exception.printStackTrace();}
+        finally {lock.unlock();}
     }
 }
