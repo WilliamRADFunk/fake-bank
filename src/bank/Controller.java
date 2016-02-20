@@ -64,10 +64,7 @@ public class Controller implements Initializable
 
             application = Executors.newFixedThreadPool( numDepositThreads + numWithdrawalThreads );
 
-            account = new Account(text_transactions);
-
-            System.out.println( "Deposits\t\t\t\t\t\t\t\t\tWithdrawals\t\t\t\t\t\t\t\t\t\tBalance" );
-            System.out.println( "--------\t\t\t\t\t\t\t\t\t-----------\t\t\t\t\t\t\t\t\t\t-------\n" );
+            account = new Account();
 
             try {
                 for(int i = 0; i < this.numDepositThreads; i++)
@@ -86,6 +83,7 @@ public class Controller implements Initializable
             catch( Exception exception) {
                 exception.printStackTrace();
             }
+            text_transactions.setText("Transactions under way. A log will generate when you press the 'stop' button.");
         }
         catch(Exception e) {System.out.println("DEBUG: -----Start-----\n" + e + "DEBUG: ------End------\n");}
     }
@@ -95,6 +93,8 @@ public class Controller implements Initializable
     private void stop()
     {
         application.shutdown();
+
+        showTransactions();
 
         this.numDepositThreads = 3;
         this.numWithdrawalThreads = 6;
@@ -111,5 +111,10 @@ public class Controller implements Initializable
         withdrawals.forEach(bank.Withdrawal::kill);
         deposits.clear();
         withdrawals.clear();
+    }
+    // Commit transaction strings to the GUI textArea.
+    public void showTransactions()
+    {
+        text_transactions.setText(account.getLog());
     }
 }

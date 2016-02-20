@@ -6,9 +6,6 @@
 */
 package bank;
 
-
-import javafx.scene.control.TextArea;
-
 import java.util.concurrent.locks.*;
 
 public class Account implements bank.Buffer {
@@ -21,10 +18,10 @@ public class Account implements bank.Buffer {
     private int balance = 0;
     // Conditional determining if thread is currently accessing the account.
     private boolean occupied = false;
-    private TextArea text;
+    private String log = "";
 
     // Constructor
-    public Account(TextArea text_transactions) {this.text = text_transactions;}
+    public Account() {}
     // Account has enough money, now a withdrawal is made.
     public void makeWithdrawal(int value)
     {
@@ -37,16 +34,20 @@ public class Account implements bank.Buffer {
             {
                 balance -= value;
                 String transaction;
-                if(value < 10) transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t\t\t\t\t\t$" + balance;
-                else transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t\t\t\t\t$" + balance;
-                //this.text.appendText(transaction);
-                System.out.println(transaction);
+                if(value < 10) transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t$" + balance +
+                                             "\n" + "-------------------------------------------------------------" +
+                                             "---------------------------------------------------------------\n";
+                else transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t$" + balance + "\n" +
+                                   "---------------------------------------------------------------------------" +
+                                   "-------------------------------------------------\n";
+                setLog(transaction);
             }
             else
             {
-                String transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\t\t\t\t\tINSUFFICIENT FUNDS!";
-                //this.text.appendText(transaction);
-                System.out.println(transaction);
+                String transaction = "\t\t\t\t\t\t\t\t\t\tWithdrawal ($" + value + ")\t\t\t\t\tINSUFFICIENT FUNDS!\n" +
+                                     "------------------------------------------------------------------------------" +
+                                     "----------------------------------------------\n";
+                setLog(transaction);
             }
             occupied = false;
             canRead.signalAll();
@@ -64,14 +65,24 @@ public class Account implements bank.Buffer {
             while(occupied) {canRead.await();}
             occupied = true;
             balance += value;
-            String transaction = "Deposit ($" + value + ")\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t$" + balance;
-            //this.text.appendText(transaction);
-            System.out.println(transaction);
+            String transaction = "Deposit ($" + value + ")\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t$" + balance + "\n" +
+                                 "--------------------------------------------------------------------------" +
+                                 "--------------------------------------------------\n";
+            setLog(transaction);
             occupied = false;
             canWithdrawal.signalAll();
             canRead.signalAll();
         }
         catch ( InterruptedException exception ) {exception.printStackTrace();}
         finally {lock.unlock();}
+    }
+    // Getter for the account's transaction log.
+    @Override
+    public String getLog() {
+        return log;
+    }
+    // Setter for the account's transaction log.
+    public void setLog(String log) {
+        this.log += log;
     }
 }

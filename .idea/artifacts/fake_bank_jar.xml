@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="fake-bank:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/fake_bank_jar</output-path>
+    <root id="archive" name="fake-bank.jar">
+      <element id="module-output" name="fake-bank" />
+    </root>
+  </artifact>
+</component>
